@@ -47,7 +47,7 @@ set::iterator::~iterator ()
 // Разыменование итератора end() неопределено.
 // Разыменование невалидного итератора неопределено.
 set::value_type const& set::iterator::operator*() const{
-	assert(is_valid);
+	assert(is_valid && cur->val != inf);
 	return cur->val;
 }
 
