@@ -3,11 +3,11 @@
 
 #include <vector>
 
-
+template <class T>
 struct set
 {
     // Вы можете определить этот тайпдеф по вашему усмотрению.
-    typedef int value_type;
+    //typedef int T;
 
     // Bidirectional iterator.
     struct iterator;
@@ -31,14 +31,14 @@ struct set
     // Поиск элемента.
     // Возвращает итератор на найденный элемент, либо end(), если элемент
     // с указанным значением отсутвует.
-    iterator find(value_type);
+    iterator find(T);
 
     // Вставка элемента.
     // 1. Если такой ключ уже присутствует, вставка не производиться, возвращается итератор
     //    на уже присутствующий элемент и false.
     // 2. Если такого ключа ещё нет, производиться вставка, возвращается итератор на созданный
     //    элемент и true.
-    std::pair<iterator, bool> insert(value_type);
+    std::pair<iterator, bool> insert(T);
 
     // Удаление элемента.
     // Инвалидирует только итераторы удаленной вершины.
@@ -49,7 +49,7 @@ struct set
     // Возващает итератор на элемент следующий за элементом с максимальным ключом.
     iterator end();
 
-    iterator appr_find(value_type);
+    iterator appr_find(T);
     void erase_node(node*);
 
     node* copy(node* src);
@@ -57,62 +57,70 @@ struct set
     void clear();
     void info(iterator);
     
-    
+    struct iterator
+    {
 
+        friend set;
+        // Элемент на который сейчас ссылается итератор.
+        // Разыменование итератора end() неопределено.
+        // Разыменование невалидного итератора неопределено.
+        T const& operator*() const;
+
+        // Переход к элементу со следующим по величине ключом.
+        // Инкремент итератора end() неопределен.
+        // Инкремент невалидного итератора неопределен.
+        iterator& operator++();
+        iterator operator++(int);
+
+        // Переход к элементу с предыдущим по величине ключом.
+        // Декремент итератора begin() неопределен.
+        // Декремент невалидного итератора неопределен.
+        iterator& operator--();
+        iterator operator--(int);
+        bool equal(iterator const);
+
+        iterator(set*);
+        ~iterator();
+        iterator operator=(iterator);
+
+        // bool operator==(iterator const&) const;
+        // bool operator!=(iterator const&) const;
+
+        bool operator==(iterator const&);
+
+        bool operator!=(iterator const&);// noexcept
+
+    private:
+        node* cur = nullptr;
+        bool is_valid = true;
+        set* owner;
+    };
+
+    struct node
+    {
+
+        T val;
+        node* left;
+        node* right;
+        node* parent;
+        node(T new_val);
+    };
 
 private:
     node* head;
     std::vector<iterator*> v;
 };
 
-struct set::iterator
-{
-
-    friend set;
-    // Элемент на который сейчас ссылается итератор.
-    // Разыменование итератора end() неопределено.
-    // Разыменование невалидного итератора неопределено.
-    value_type const& operator*() const;
-
-    // Переход к элементу со следующим по величине ключом.
-    // Инкремент итератора end() неопределен.
-    // Инкремент невалидного итератора неопределен.
-    iterator& operator++();
-    iterator operator++(int);
-
-    // Переход к элементу с предыдущим по величине ключом.
-    // Декремент итератора begin() неопределен.
-    // Декремент невалидного итератора неопределен.
-    iterator& operator--();
-    iterator operator--(int);
-    bool equal(iterator const);
-
-    iterator(set*);
-    ~iterator();
-    iterator operator=(iterator);
 
 
 
-private:
-    node* cur = nullptr;
-    bool is_valid = true;
-    set* owner;
-};
-
-struct set::node
-{
-
-    value_type val;
-    node* left;
-    node* right;
-    node* parent;
-    node(int new_val);
-};
 
 // Сравнение. Итераторы считаются эквивалентными если они ссылаются на один и тот же элемент.
 // Сравнение с невалидным итератором не определено.
 // Сравнение итераторов двух разных контейнеров не определено.
-bool operator==(set::iterator, set::iterator);
-bool operator!=(set::iterator, set::iterator);
+// template <class T>
+// bool operator==(set<T>::iterator, set<T>::iterator);
+// template <class T>
+// bool operator!=(set<T>::iterator, set<T>::iterator);
 
 #endif
