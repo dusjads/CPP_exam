@@ -1,17 +1,17 @@
 #ifndef SET
 #define SET
 
+#include <cassert>
+#include <iostream>
 #include <vector>
 
 template <class T>
 struct set
 {
-    // Вы можете определить этот тайпдеф по вашему усмотрению.
-    //typedef int T;
-
     // Bidirectional iterator.
     struct iterator;
     struct node;
+    struct opt;
 
     // Создает пустой set.
     set();
@@ -49,7 +49,7 @@ struct set
     // Возващает итератор на элемент следующий за элементом с максимальным ключом.
     iterator end();
 
-    iterator appr_find(T);
+    iterator appr_find(opt);
     void erase_node(node*);
 
     node* copy(node* src);
@@ -81,14 +81,15 @@ struct set
 
         iterator(set*);
         ~iterator();
-        iterator operator=(iterator);
+        iterator operator=(iterator const&);
 
-        // bool operator==(iterator const&) const;
-        // bool operator!=(iterator const&) const;
+        // Сравнение. Итераторы считаются эквивалентными если они ссылаются на один и тот же элемент.
+        // Сравнение с невалидным итератором не определено.
+        // Сравнение итераторов двух разных контейнеров не определено.
 
         bool operator==(iterator const&);
 
-        bool operator!=(iterator const&);// noexcept
+        bool operator!=(iterator const&);
 
     private:
         node* cur = nullptr;
@@ -96,15 +97,62 @@ struct set
         set* owner;
     };
 
+    struct opt
+    {
+        int type;
+        T value;
+
+        opt(){}
+
+        opt(int tp, T val) {
+            type = tp;
+            value = val;
+        }
+
+        opt(int tp){
+            assert(tp == 1 || tp == -1);
+            type = tp;
+        }
+
+        opt& operator=(opt const& rhs){
+            type = rhs.type;
+            value = rhs.value;
+            return *this;
+        }
+
+
+        bool operator<(opt const& rhs) const{
+            return (type < rhs.type || (type == rhs.type && type == 0 && value < rhs.value));
+        }
+
+        bool operator>(opt const& rhs) const{
+            return rhs < *this;
+        }
+
+        bool operator==(opt const& rhs) const{
+            return (type == rhs.type && (type != 0 || value == rhs.value));
+        }
+
+        bool operator!=(opt const& rhs) const{
+            return !(*this == rhs);
+        }
+    };
+
     struct node
     {
 
-        T val;
+        opt val;
         node* left;
         node* right;
         node* parent;
-        node(T new_val);
+        node(T);
+        node(opt);
+
+        
     };
+
+    opt inf = opt(1);
+    opt min_inf = opt(-1);
 
 private:
     node* head;
@@ -115,12 +163,5 @@ private:
 
 
 
-// Сравнение. Итераторы считаются эквивалентными если они ссылаются на один и тот же элемент.
-// Сравнение с невалидным итератором не определено.
-// Сравнение итераторов двух разных контейнеров не определено.
-// template <class T>
-// bool operator==(set<T>::iterator, set<T>::iterator);
-// template <class T>
-// bool operator!=(set<T>::iterator, set<T>::iterator);
 
 #endif

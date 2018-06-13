@@ -1,12 +1,19 @@
 #include "set.h"
-#include <iostream>
-#include <cassert>
+#include "test.h"
 
-const int inf = 1e9;
+
 
 template<class T>
 set<T>::node::node(T new_val){
-    val = new_val;
+    val = opt(0, new_val);
+    left = nullptr;
+    right = nullptr;
+    parent = nullptr;
+}
+
+template<class T>
+set<T>::node::node(opt opt_val){
+    val = opt_val;
     left = nullptr;
     right = nullptr;
     parent = nullptr;
@@ -19,7 +26,7 @@ set<T>::iterator::iterator(set* my_set){
 }
 
 template<class T>
-typename set<T>::iterator set<T>::iterator::operator=(iterator rhs){
+typename set<T>::iterator set<T>::iterator::operator=(iterator const& rhs){
     cur = rhs.cur;
     is_valid = rhs.is_valid;
     owner->v.push_back(this);
@@ -40,20 +47,14 @@ set<T>::iterator::~iterator ()
     }
 }
 
-// void set<T>::iterator::swap(iterator &rhs)
-// {
-//     std::swap(cur, rhs.cur);
-//     std::swap(is_valid, rhs.is_valid);
-//     std::swap(owner, rhs.owner);
-// }
 
 // Элемент на который сейчас ссылается итератор.
 // Разыменование итератора end() неопределено.
 // Разыменование невалидного итератора неопределено.
 template<class T>
 T const& set<T>::iterator::operator*() const{
-    assert(is_valid && cur->val != inf);
-    return cur->val;
+    assert(is_valid && cur->val != owner->inf);
+    return cur->val.value;
 }
 
 // Переход к элементу со следующим по величине ключом.
@@ -61,8 +62,8 @@ T const& set<T>::iterator::operator*() const{
 // Инкремент невалидного итератора неопределен.
 template<class T>
 typename set<T>::iterator& set<T>::iterator::operator++(){
-    assert(is_valid && cur->val != inf);
-    if (cur->val == inf)
+    assert(is_valid && cur->val != owner->inf);
+    if (cur->val == owner->inf)
         return *this;
     if (cur->right){
         cur = cur->right;
@@ -74,10 +75,6 @@ typename set<T>::iterator& set<T>::iterator::operator++(){
     while (cur->parent && cur == cur->parent->right){
         cur = cur->parent;
     }
-    // if (!cur->parent){
-    //  is_end = true;
-    //  return *this;
-    // }
     assert(cur->parent);
     cur = cur->parent;
     return *this;
@@ -126,7 +123,7 @@ set<T>::set() {
 
 template<class T>
 typename set<T>::node* set<T>::copy(node* src){
-    //std::cout << "in copy " << src->val << '\n';
+    // std::cout << "in copy " << src->val.type << ' ' << src->val.value << '\n';
     node* new_node = new node(src->val);
     if (src->right){
         new_node->right = copy(src->right);
@@ -151,7 +148,7 @@ set<T>::set(set const& source){
 template<class T>
 bool set<T>::empty(){
     // std::cout << "in empty ";
-    // std::cout << head->val << '\n';
+    // std::cout << head->val.type << ' ' << (head->val == inf) << '\n';
     return head->val == inf;
 }
 
@@ -188,7 +185,7 @@ set<T>::~set(){
 // Вершина, под которой надо вставить
 // end для пустого
 template<class T>
-typename set<T>::iterator set<T>::appr_find(T x){
+typename set<T>::iterator set<T>::appr_find(opt x){
     iterator new_it = iterator(this);
     new_it.cur = head;
     if (head->val == inf)
@@ -214,12 +211,9 @@ typename set<T>::iterator set<T>::appr_find(T x){
 // с указанным значением отсутвует.
 template<class T>
 typename set<T>::iterator set<T>::find(T x){
-    iterator new_it = appr_find(x);
+    iterator new_it = appr_find(opt(0, x));
     node* it_node = new_it.cur;
-    if (x == inf){
-        return new_it;
-    }
-    if (it_node->val != x)
+    if (it_node->val.value != x)
         return end();
     return new_it;
 }
@@ -230,9 +224,9 @@ typename set<T>::iterator set<T>::find(T x){
 // 2. Если такого ключа ещё нет, производиться вставка, возвращается итератор на созданный
 //    элемент и true.
 template<class T>
-std::pair<typename set<T>::iterator, bool> set<T>::insert(T x){
+std::pair<typename set<T>::iterator, bool> set<T>::insert(T y){
     if (head->val == inf){
-        node* new_node = new node(x);
+        node* new_node = new node(y);
         head->parent = new_node;
         new_node->right = head;
         head = new_node;
@@ -240,6 +234,7 @@ std::pair<typename set<T>::iterator, bool> set<T>::insert(T x){
         new_it.cur = head;
         return std::make_pair(new_it, true);
     }
+    opt x(0, y); 
     iterator new_it = appr_find(x);
     node* it_node = new_it.cur;
     // std::cout << "it_node " << it_node->val << '\n';
@@ -319,7 +314,7 @@ void set<T>::erase_node(node* old){
     while (max_left->right){
         max_left = max_left->right;
     }
-    T key = max_left->val;
+    opt key = max_left->val;
     erase_node(max_left);
     delete max_left;
     // std::cout << "out of en\n";
@@ -350,7 +345,7 @@ void set<T>::erase(iterator it){
     // std::cout << "in erase\n";
     // std::cout << it.is_valid << ' ' << (it.cur->val != inf) << '\n';
     assert(it.is_valid && it.cur->val != inf);
-    T val = it.cur->val;
+    opt val = it.cur->val;
     erase_node(it.cur);
     for (auto &i : v){
         if (i->cur->val == val){
@@ -363,12 +358,12 @@ void set<T>::erase(iterator it){
 // Возващает итератор на элемент с минимальный ключом.
 template<class T>
 typename set<T>::iterator set<T>::begin(){
-    return appr_find(-inf);
+    return appr_find(min_inf);
 }
 // Возващает итератор на элемент следующий за элементом с максимальным ключом.
 template<class T>
 typename set<T>::iterator set<T>::end(){
-    return find(inf);
+    return appr_find(inf);
 }
 
 template<class T>
@@ -386,99 +381,25 @@ bool set<T>::iterator::operator!=(set<T>::iterator const& right){
     return !this->equal(right);
 }
 
-// template<class T>
-// bool operator==(set<T>::iterator left, set<T>::iterator right){
-//     return left.equal(right);
-// }
-
-// template<class T>
-// bool operator!=(set<T>::iterator left, set<T>::iterator right){
-//     return !left.equal(right);
-// }
 
 template<class T>
 void set<T>::info(set<T>::iterator a){
     node* b = a.cur;
-    std::cout << "value " << b->val << '\n';
+    std::cout << "value " << b->val.value << '\n';
     std::cout << "parent ";
-    ((b->parent) ? std::cout << (b->parent->val) : std::cout << "none") << '\n';
+    ((b->parent) ? std::cout << (b->parent->val.value) : std::cout << "none") << '\n';
     std::cout << "right ";
-    ((b->right) ? std::cout << b->right->val :std::cout << "none") << '\n';
+    ((b->right) ? std::cout << b->right->val.value :std::cout << "none") << '\n';
     std::cout << "left "; 
-    ((b->left) ? std::cout << b->left->val : std::cout <<"none") << '\n';
+    ((b->left) ? std::cout << b->left->val.value : std::cout <<"none") << '\n';
 
 }
 
-template<class T>
-void print(set<T> a){
-    for (auto it = a.begin(); it != a.end(); it++)
-        std::cout << *it << ' ';
-    std::cout << '\n';
-}
+
 
 int main()
 {
-    set<int> c;
-    c.insert(5);
-    c.insert(6);
-    c.insert(0);
-    set<int> b = c;
- //    for (auto it = b.begin(); it != b.end(); it++)
-    //  std::cout << *it << ' ';
-    // std::cout << '\n';
-    // for (auto it = c.begin(); it != c.end(); it++)
-    //  std::cout << *it << ' ';
-    // std::cout << '\n';
-    print(c);
-    print(b);
-    for (int i = 0; i < 20; i+=5)
-        c.insert(i);
-    c.insert(10);
-    // c.info(c.find(inf));
-    c.insert(8);
-    // c.info(c.find(8));
-    for (int i = 0; i < 20; i+=2)
-        c.insert(i);
-    for (int i = 0; i < 20; i+=3)
-        c.insert(i);
-    for(auto it = c.begin(); it != c.end(); it++)
-        std::cout << *it << ' ';
-    std::cout << '\n';
-   
-   std::cout << *c.find(5) << '\n';
-   auto it = c.find(5);
-   c.erase(it);
-
-    it = c.begin();
-    while (it != c.end()){
-        auto tmp = it;
-        tmp++;
-        if (*it % 2) {
-            c.erase(it);
-        }
-        it = tmp;
-    }
-    for(auto it = c.begin(); it != c.end(); it++)
-        std::cout << *it << ' ';
-    std::cout << '\n';
-    for(auto it = --c.end(); it != c.begin(); it--)
-        std::cout << *it << ' ';
-    std::cout << *c.begin() << '\n';
-    it = c.end();
-    c.insert(19);
-    for(auto it = c.begin(); it != c.end(); it++)
-        std::cout << *it << ' ';
-    std::cout << '\n';
-    auto it2 = it;
-    it2--;
-    std::cout << *it2 << '\n';
-    auto it3 = c.end();
-    c.insert(20);
-    it3--;
-    std::cout << *it3 << '\n';
-    print(b);
-    b = c;
-    print(b);
-    std::cout << (c.end() == ++(--c.end())) << '\n';
+    test<std::string>();
+    test<int>();
     return 0;       
 }
