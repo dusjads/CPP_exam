@@ -48,14 +48,6 @@ struct set
     iterator begin();
     // Возващает итератор на элемент следующий за элементом с максимальным ключом.
     iterator end();
-
-    iterator appr_find(opt);
-    void erase_node(node*);
-
-    node* copy(node* src);
-    bool empty();
-    void clear();
-    void info(iterator);
     
     struct iterator
     {
@@ -77,7 +69,6 @@ struct set
         // Декремент невалидного итератора неопределен.
         iterator& operator--();
         iterator operator--(int);
-        bool equal(iterator const);
 
         iterator(set*);
         ~iterator();
@@ -95,6 +86,8 @@ struct set
         node* cur = nullptr;
         bool is_valid = true;
         set* owner;
+        
+        bool equal(iterator const);
     };
 
     struct opt
@@ -147,16 +140,23 @@ struct set
         node* parent;
         node(T);
         node(opt);
-
-        
     };
 
-    opt inf = opt(1);
-    opt min_inf = opt(-1);
 
 private:
     node* head;
     std::vector<iterator*> v;
+
+    iterator appr_find(opt);
+    void erase_node(node*);
+
+    node* copy(node* src);
+    bool empty();
+    void clear();
+    void info(iterator);
+
+    opt inf = opt(1);
+    opt min_inf = opt(-1);
 };
 
 
