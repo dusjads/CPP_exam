@@ -20,6 +20,62 @@ void print_ok(std::set<T> a){
     std::cout << '\n';
 }
 
+void test_int2(){
+    std::set <int> ok;
+    set<int> my;
+    bool check = true;
+    for (int i = 0; i < 20; i += 3){
+        my.insert(i);
+        ok.insert(i);
+    }
+    for (int i = 10000; i > -10000; i -= 13){
+        my.insert(i);
+        ok.insert(i);
+    }
+    for (int i = 0; i < 200; i += 4){
+        my.insert(i);
+        ok.insert(i);
+    }
+    auto ok_it = ok.begin();
+    auto my_it = my.begin();
+    while (my_it != my.end()){
+        check &= (*my_it == *ok_it);
+        my_it++;
+        ok_it++;
+    }
+    std::cout << (check ? "OK" : "Oh, no") << '\n';
+
+    auto my3(my);
+
+    set<int> my2(my);
+    ok_it = ok.begin();
+    auto my2_it = my2.begin();
+    while (my2_it != my2.end()){
+        check &= (*my2_it == *ok_it);
+        my2_it++;
+        ok_it++;
+    }
+    std::cout << (check ? "OK" : "Oh, no") << '\n';
+    ok_it = ok.begin();
+    my_it = my.begin();
+    while (ok_it != ok.end()){
+        ok.erase(ok_it);
+        my.erase(my_it);
+        ok_it = ok.begin();
+        my_it = my.begin();
+    }
+    ok_it = ok.begin();
+    my_it = my.begin();
+    while (my_it != my.end()){
+        check &= (*my_it == *ok_it);
+        my_it++;
+        ok_it++;
+    }
+    std::cout << (check ? "OK" : "Oh, no") << '\n';
+    my3.clear();
+    std::cout << my3.empty() << '\n';
+}
+
 void test_int(){
     set<int> c;
     c.insert(5);
@@ -138,7 +194,7 @@ void test(){
     bool type_int = std::is_same<T,int>::value;
 
     if (type_int){
-        test_int();
+        test_int2();
     }
     else
     {

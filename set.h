@@ -44,6 +44,10 @@ struct set
     // Инвалидирует только итераторы удаленной вершины.
     void erase(iterator);
 
+    bool empty() const;
+
+    void clear();
+
     // Возващает итератор на элемент с минимальный ключом.
     iterator begin();
     // Возващает итератор на элемент следующий за элементом с максимальным ключом.
@@ -151,8 +155,6 @@ private:
     void erase_node(node*);
 
     node* copy(node* src);
-    bool empty();
-    void clear();
     void info(iterator);
 
     opt inf = opt(1);

@@ -146,7 +146,7 @@ set<T>::set(set const& source){
 }
 
 template<class T>
-bool set<T>::empty(){
+bool set<T>::empty() const{
     // std::cout << "in empty ";
     // std::cout << head->val.type << ' ' << (head->val == inf) << '\n';
     return head->val == inf;
