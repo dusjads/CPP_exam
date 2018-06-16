@@ -68,6 +68,27 @@ void test_int2(){
     }
     std::cout << (check ? "OK" : "Oh, no") << '\n';
     check = true;
+    
+    set<int> my4;
+    set<int> my5(my2);
+    my4.swap(my5);
+    ok_it = ok.begin();
+    auto my4_it = my4.begin();
+    while (my4_it != my4.end()){
+        check &= (*my4_it == *ok_it);
+        my4_it++;
+        ok_it++;
+    }
+    std::cout << (check ? "OK" : "Oh, no") << '\n';
+    check = true;
+
+    ok_it = ok.begin();
+    my_it = my.begin();
+    auto ok_it1 = std::next(ok_it);
+    auto my_it1 = next(my_it);
+    assert(*my_it1 == *ok_it1);
+
+// ------------------------erase------------------
     ok_it = ok.begin();
     my_it = my.begin();
     while (ok_it != ok.end()){

@@ -8,8 +8,8 @@
 template <class T>
 struct set
 {
-    // Bidirectional iterator.
-    struct iterator;
+    // Bidirectional const_iterator.
+    struct const_iterator;
     struct node;
     struct opt;
 
@@ -23,6 +23,14 @@ struct set
     set(set const& source){
         head = copy(source.head);
         sz = source.size();
+    }
+
+    void swap(set& rhs){
+        // std::swap(v, rhs.v);
+        auto tmp = v;
+        v = rhs.v;
+        rhs.v = tmp;
+        std::swap(head, rhs.head);
     }
 
     // Изменяет this так, чтобы он содержал те же элементы, что и rhs.
@@ -47,8 +55,8 @@ struct set
     // Поиск элемента.
     // Возвращает итератор на найденный элемент, либо end(), если элемент
     // с указанным значением отсутвует.
-    iterator find(T x){
-        iterator new_it = appr_find(opt(0, x));
+    const_iterator find(T x){
+        const_iterator new_it = appr_find(opt(0, x));
         node* it_node = new_it.cur;
         if (it_node->val.value != x)
             return end();
@@ -56,9 +64,9 @@ struct set
     }
 
     // возвращает итератор на первый элемент не менее, чем заданное значение
-    iterator lower_bound(T x) {
+    const_iterator lower_bound(T x) {
         // std::cout << "in lower\n";
-        iterator new_it = appr_find(opt(0, x));
+        const_iterator new_it = appr_find(opt(0, x));
         while (new_it.cur->parent && new_it.cur->val.value < x){
             new_it.cur = new_it.cur->parent;
         }
@@ -67,12 +75,12 @@ struct set
         return new_it;
     }
     // возвращает итератор на первый элемент больше, чем определенное значение
-    iterator upper_bound(T x) {
-        iterator new_it = appr_find(opt(0, x));
+    const_iterator upper_bound(T x) {
+        const_iterator new_it = appr_find(opt(0, x));
         // std::cout << "in upper " << x << ' ' << new_it.cur->val.value << '\n';
         // if (x == 3)
         //  info(new_it);
-        iterator new_it2 = new_it;
+        const_iterator new_it2 = new_it;
         if (new_it.cur->right && new_it.cur->val.value <= x){
             new_it.cur = new_it.cur->right;
         }
@@ -95,19 +103,19 @@ struct set
     //    на уже присутствующий элемент и false.
     // 2. Если такого ключа ещё нет, производиться вставка, возвращается итератор на созданный
     //    элемент и true.
-    std::pair<iterator, bool> insert(T y){
+    std::pair<const_iterator, bool> insert(T y){
         if (head->val == inf){
             node* new_node = new node(y);
             head->parent = new_node;
             new_node->right = head;
             head = new_node;
-            iterator new_it(this);
+            const_iterator new_it(this);
             new_it.cur = head;
             sz++;
             return std::make_pair(new_it, true);
         }
         opt x(0, y); 
-        iterator new_it = appr_find(x);
+        const_iterator new_it = appr_find(x);
         node* it_node = new_it.cur;
         // std::cout << "it_node " << it_node->val << '\n';
         if (it_node->val == x){
@@ -135,7 +143,7 @@ struct set
 
     // Удаление элемента.
     // Инвалидирует только итераторы удаленной вершины.
-    void erase(iterator it){
+    void erase(const_iterator it){
         // std::cout << "in erase\n";
         // std::cout << it.is_valid << ' ' << (it.cur->val != inf) << '\n';
         assert(it.is_valid && it.cur->val != inf);
@@ -165,20 +173,19 @@ struct set
     }
 
     // Возващает итератор на элемент с минимальный ключом.
-    iterator begin(){
+    const_iterator begin(){
         return appr_find(min_inf);
     }
     // Возващает итератор на элемент следующий за элементом с максимальным ключом.
-    iterator end(){
+    const_iterator end(){
         return appr_find(inf);
     }
-
 
     size_t size() const {
         return sz;
     }
-    
-    struct iterator
+
+    struct const_iterator
     {
 
         friend set;
@@ -192,7 +199,7 @@ struct set
         // Переход к элементу со следующим по величине ключом.
         // Инкремент итератора end() неопределен.
         // Инкремент невалидного итератора неопределен.
-        iterator& operator++(){
+        const_iterator& operator++(){
             assert(is_valid && cur->val != owner->inf);
             if (cur->val == owner->inf)
                 return *this;
@@ -211,8 +218,8 @@ struct set
             return *this;
         }
 
-        iterator operator++(int){
-            iterator prev = *this;
+        const_iterator operator++(int){
+            const_iterator prev = *this;
             ++*this;
             return prev;
         }
@@ -220,7 +227,7 @@ struct set
         // Переход к элементу с предыдущим по величине ключом.
         // Декремент итератора begin() неопределен.
         // Декремент невалидного итератора неопределен.
-        iterator& operator--(){
+        const_iterator& operator--(){
             //std::cout << "in --\n";
             assert(is_valid);
             if (cur->left){
@@ -238,18 +245,20 @@ struct set
             return *this;
         }
 
-        iterator operator--(int){
-            iterator next = *this;
+        const_iterator operator--(int){
+            const_iterator next = *this;
             --*this;
             return next;
         }
 
-        iterator(set* my_set){
+        const_iterator();
+
+        const_iterator(set* my_set){
             owner = my_set;
             my_set->v.push_back(this);
         }
 
-        ~iterator () {   
+        ~const_iterator () {   
             for (size_t it = 0; it < owner->v.size(); it++) {
                 if (owner->v[it] == this) {   
                     owner->v.erase(owner->v.begin() + it);
@@ -258,7 +267,8 @@ struct set
             }
         }
 
-        iterator operator=(iterator const& rhs){
+        const_iterator operator=(const_iterator const& rhs){
+            owner = rhs.owner;
             cur = rhs.cur;
             is_valid = rhs.is_valid;
             owner->v.push_back(this);
@@ -268,11 +278,11 @@ struct set
         // Сравнение с невалидным итератором не определено.
         // Сравнение итераторов двух разных контейнеров не определено.
 
-        bool operator==(set<T>::iterator const& right){
+        bool operator==(set<T>::const_iterator const& right){
             return this->equal(right);
         }
 
-        bool operator!=(set<T>::iterator const& right){
+        bool operator!=(set<T>::const_iterator const& right){
             return !this->equal(right);
         }
 
@@ -281,7 +291,7 @@ struct set
         bool is_valid = true;
         set* owner;
         
-        bool equal(set<T>::iterator const right){
+        bool equal(set<T>::const_iterator const right){
             return cur == right.cur;
         }
     };
@@ -352,10 +362,10 @@ struct set
 
 private:
     node* head;
-    std::vector<iterator*> v;
+    std::vector<const_iterator*> v;
 
-    iterator appr_find(opt x){
-        iterator new_it = iterator(this);
+    const_iterator appr_find(opt x){
+        const_iterator new_it = const_iterator(this);
         new_it.cur = head;
         if (head->val == inf)
             return new_it;
@@ -467,7 +477,7 @@ private:
         return new_node;
     }
 
-    void info(set<T>::iterator a){
+    void info(set<T>::const_iterator a){
         node* b = a.cur;
         std::cout << "value " << b->val.value << '\n';
         std::cout << "parent ";
@@ -486,8 +496,17 @@ private:
 };
 
 
+template<class T>
+T next(T it){
+    T next = it;
+    return ++next;
+}
 
-
+template<class T>
+T prev(T it){
+    T prev = it;
+    return --prev;
+}
 
 
 #endif
