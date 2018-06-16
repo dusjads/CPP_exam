@@ -182,7 +182,7 @@ set<T>::~set(){
     clear();
     delete head;
 }
-// Вершина, под которой надо вставить
+// Вершина (итератор), под которой надо вставить 
 // end для пустого
 template<class T>
 typename set<T>::iterator set<T>::appr_find(opt x){
@@ -216,6 +216,44 @@ typename set<T>::iterator set<T>::find(T x){
     if (it_node->val.value != x)
         return end();
     return new_it;
+}
+
+// возвращает итератор на первый элемент не менее, чем заданное значение
+template<class T>
+typename set<T>::iterator set<T>::lower_bound(T x) {
+    // std::cout << "in lower\n";
+	iterator new_it = appr_find(opt(0, x));
+	while (new_it.cur->parent && new_it.cur->val.value < x){
+		new_it.cur = new_it.cur->parent;
+	}
+	if (new_it.cur->val.value < x)
+		return end();
+	return new_it;
+}
+
+// возвращает итератор на первый элемент больше, чем определенное значение
+template<class T>
+typename set<T>::iterator set<T>::upper_bound(T x) {
+	iterator new_it = appr_find(opt(0, x));
+    // std::cout << "in upper " << x << ' ' << new_it.cur->val.value << '\n';
+    // if (x == 3)
+    // 	info(new_it);
+    iterator new_it2 = new_it;
+    if (new_it.cur->right && new_it.cur->val.value <= x){
+		new_it.cur = new_it.cur->right;
+    }
+	while (new_it.cur->left){
+		new_it.cur = new_it.cur->left;
+		// std::cout << new_it.cur->val.value << '\n';
+	}
+	while (new_it2.cur->parent && new_it2.cur->val.value <= x){
+		new_it2.cur = new_it2.cur->parent;
+	}
+	if (*new_it <= x && *new_it2 <= x)
+		return end();
+	if (*new_it > x && (*new_it <= *new_it2 || *new_it2 <= x))
+		return new_it;
+	return new_it2;
 }
 
 // Вставка элемента.

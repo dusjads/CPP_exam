@@ -39,11 +39,18 @@ void test_int2(){
     auto ok_it = ok.begin();
     auto my_it = my.begin();
     while (my_it != my.end()){
-        check &= (*my_it == *ok_it);
+        check &= (*my_it == *ok_it);        
+        int x = *my_it;
+        check &= (*my.lower_bound(x-1) == *ok.lower_bound(x-1));
+        int a = *my.upper_bound(x-1);
+        int b = *ok.upper_bound(x-1);
+        assert(a == b);
+        check &= (a == b);
         my_it++;
         ok_it++;
     }
     std::cout << (check ? "OK" : "Oh, no") << '\n';
+    check = true;
 
     auto my3(my);
 
@@ -56,6 +63,7 @@ void test_int2(){
         ok_it++;
     }
     std::cout << (check ? "OK" : "Oh, no") << '\n';
+    check = true;
     ok_it = ok.begin();
     my_it = my.begin();
     while (ok_it != ok.end()){
@@ -72,6 +80,10 @@ void test_int2(){
         ok_it++;
     }
     std::cout << (check ? "OK" : "Oh, no") << '\n';
+    int x = 0;
+    std::cout << (*my3.find(x) == x) << '\n';
+    my3.erase(my3.find(x));
+    std::cout << (my3.find(x) == my3.end()) << '\n';
     my3.clear();
     std::cout << my3.empty() << '\n';
 }
