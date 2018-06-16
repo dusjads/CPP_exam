@@ -85,7 +85,9 @@ void test_int2(){
     ok_it = ok.begin();
     my_it = my.begin();
     auto ok_it1 = std::next(ok_it);
-    auto my_it1 = next(my_it);
+    auto my_it1 = std::next(my_it);
+    ok_it = std::prev(ok_it1);
+    my_it = std::prev(my_it1);
     assert(*my_it1 == *ok_it1);
 
 // ------------------------erase------------------

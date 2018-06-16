@@ -187,6 +187,13 @@ struct set
 
     struct const_iterator
     {
+    public:
+        typedef int difference_type;
+        typedef const_iterator self_type;
+        typedef T value_type;
+        typedef T& reference;
+        typedef T* pointer;
+        typedef std::bidirectional_iterator_tag iterator_category;
 
         friend set;
         // Элемент на который сейчас ссылается итератор.
@@ -252,6 +259,14 @@ struct set
         }
 
         const_iterator();
+
+        const_iterator(const_iterator const& rhs){
+            owner = rhs.owner;
+            cur = rhs.cur;
+            is_valid = rhs.is_valid;
+            owner->v.push_back(this);
+        };
+
 
         const_iterator(set* my_set){
             owner = my_set;
@@ -496,17 +511,17 @@ private:
 };
 
 
-template<class T>
-T next(T it){
-    T next = it;
-    return ++next;
-}
+// template<class T>
+// T next(T it){
+//     T next = it;
+//     return ++next;
+// }
 
-template<class T>
-T prev(T it){
-    T prev = it;
-    return --prev;
-}
+// template<class T>
+// T prev(T it){
+//     T prev = it;
+//     return --prev;
+// }
 
 
 #endif
