@@ -119,6 +119,7 @@ typename set<T>::iterator set<T>::iterator::operator--(int){
 template<class T>
 set<T>::set() {
     head = new node(inf);
+    sz = 0;
 }
 
 template<class T>
@@ -143,6 +144,7 @@ typename set<T>::node* set<T>::copy(node* src){
 template<class T>
 set<T>::set(set const& source){
     head = copy(source.head);
+    sz = source.size();
 }
 
 template<class T>
@@ -170,6 +172,7 @@ set<T>& set<T>::operator=(set const& rhs){
     clear();
     delete head;
     head = copy(rhs.head);
+    sz = rhs.size();
     return *this;
 }
 
@@ -270,6 +273,7 @@ std::pair<typename set<T>::iterator, bool> set<T>::insert(T y){
         head = new_node;
         iterator new_it(this);
         new_it.cur = head;
+    	sz++;
         return std::make_pair(new_it, true);
     }
     opt x(0, y); 
@@ -295,6 +299,7 @@ std::pair<typename set<T>::iterator, bool> set<T>::insert(T y){
         new_node->parent = it_node;
     }
     new_it.cur = new_node;
+    sz++;
     return std::make_pair(new_it, true);
 }
 
@@ -390,8 +395,15 @@ void set<T>::erase(iterator it){
             i->is_valid = false;
         }
     }
+    sz--;
     delete it.cur;
 }
+
+template<class T>
+size_t set<T>::size() const {
+	return sz;
+}
+
 
 // Возващает итератор на элемент с минимальный ключом.
 template<class T>

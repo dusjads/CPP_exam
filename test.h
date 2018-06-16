@@ -31,6 +31,8 @@ void test_int2(){
     for (int i = 10000; i > -10000; i -= 13){
         my.insert(i);
         ok.insert(i);
+        // std::cout << my.size() << ' ' << ok.size() << '\n';
+        assert(my.size() == ok.size());
     }
     for (int i = 0; i < 200; i += 4){
         my.insert(i);
@@ -53,6 +55,8 @@ void test_int2(){
     check = true;
 
     auto my3(my);
+    
+    assert(my3.size() == ok.size());
 
     set<int> my2(my);
     ok_it = ok.begin();
@@ -72,6 +76,7 @@ void test_int2(){
         ok_it = ok.begin();
         my_it = my.begin();
     }
+    assert(my.size() == ok.size());
     ok_it = ok.begin();
     my_it = my.begin();
     while (my_it != my.end()){

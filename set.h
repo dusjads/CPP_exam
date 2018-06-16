@@ -58,6 +58,8 @@ struct set
     iterator begin();
     // Возващает итератор на элемент следующий за элементом с максимальным ключом.
     iterator end();
+
+    size_t size() const;
     
     struct iterator
     {
@@ -162,6 +164,8 @@ private:
 
     node* copy(node* src);
     void info(iterator);
+
+    size_t sz;
 
     opt inf = opt(1);
     opt min_inf = opt(-1);
