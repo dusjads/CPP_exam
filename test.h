@@ -28,6 +28,10 @@ void test_int2(){
         my.insert(i);
         ok.insert(i);
     }
+    auto my_it8 = my.begin();
+    auto tm = my.erase(my_it8);
+    assert(tm == my.begin());
+    ok.erase(ok.begin());
     for (int i = 10000; i > -10000; i -= 13){
         my.insert(i);
         ok.insert(i);

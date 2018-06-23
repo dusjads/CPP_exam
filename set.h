@@ -148,10 +148,13 @@ struct set
 
     // Удаление элемента.
     // Инвалидирует только итераторы удаленной вершины.
-    void erase(const_iterator it){
+    // возвращает итератор на следующий постле удаленного.
+    const_iterator erase(const_iterator it){
         // std::cout << "in erase\n";
         // std::cout << it.is_valid << ' ' << (it.cur->val != inf) << '\n';
         assert(it.is_valid && it.cur->val != inf);
+        const_iterator res = it;
+        ++res;
         opt val = it.cur->val;
         erase_node(it.cur);
         for (auto &i : v){
@@ -161,6 +164,7 @@ struct set
         }
         sz--;
         delete it.cur;
+        return res;
     }
 
     bool empty() const{
