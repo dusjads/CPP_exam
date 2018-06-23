@@ -10,6 +10,7 @@ struct set
 {
     // Bidirectional const_iterator.
     struct const_iterator;
+    typedef const_iterator iterator;
     struct node;
     struct opt;
 
@@ -26,16 +27,20 @@ struct set
     }
 
     void swap(set& rhs){
-        // std::swap(v, rhs.v);
         auto tmp = v;
         v = rhs.v;
         rhs.v = tmp;
         std::swap(head, rhs.head);
     }
+    friend void swap(set<T> l, set<T> r){
+        l.swap(r);        
+    }
 
     // Изменяет this так, чтобы он содержал те же элементы, что и rhs.
     // Инвалидирует все итераторы, принадлежащие set'у this, включая end().
     set& operator=(set const& rhs){
+        if (head == rhs.head)
+            return *this;
         clear();
         delete head;
         head = copy(rhs.head);
@@ -173,11 +178,11 @@ struct set
     }
 
     // Возващает итератор на элемент с минимальный ключом.
-    const_iterator begin(){
+    const_iterator begin() const{
         return appr_find(min_inf);
     }
     // Возващает итератор на элемент следующий за элементом с максимальным ключом.
-    const_iterator end(){
+    const_iterator end() const{
         return appr_find(inf);
     }
 
@@ -235,7 +240,6 @@ struct set
         // Декремент итератора begin() неопределен.
         // Декремент невалидного итератора неопределен.
         const_iterator& operator--(){
-            //std::cout << "in --\n";
             assert(is_valid);
             if (cur->left){
                 cur = cur->left;
@@ -258,7 +262,7 @@ struct set
             return next;
         }
 
-        const_iterator();
+        const_iterator(){}
 
         const_iterator(const_iterator const& rhs){
             owner = rhs.owner;
@@ -268,7 +272,7 @@ struct set
         };
 
 
-        const_iterator(set* my_set){
+        const_iterator(set const* my_set){
             owner = my_set;
             my_set->v.push_back(this);
         }
@@ -293,20 +297,20 @@ struct set
         // Сравнение с невалидным итератором не определено.
         // Сравнение итераторов двух разных контейнеров не определено.
 
-        bool operator==(set<T>::const_iterator const& right){
+        bool operator==(set<T>::const_iterator const& right) const{
             return this->equal(right);
         }
 
-        bool operator!=(set<T>::const_iterator const& right){
+        bool operator!=(set<T>::const_iterator const& right) const{
             return !this->equal(right);
         }
 
     private:
         node* cur = nullptr;
         bool is_valid = true;
-        set* owner;
+        set const* owner;
         
-        bool equal(set<T>::const_iterator const right){
+        bool equal(set<T>::const_iterator const right) const{
             return cur == right.cur;
         }
     };
@@ -377,9 +381,9 @@ struct set
 
 private:
     node* head;
-    std::vector<const_iterator*> v;
+    mutable std::vector<const_iterator*> v;
 
-    const_iterator appr_find(opt x){
+    const_iterator appr_find(opt x) const{
         const_iterator new_it = const_iterator(this);
         new_it.cur = head;
         if (head->val == inf)
@@ -510,18 +514,6 @@ private:
     opt min_inf = opt(-1);
 };
 
-
-// template<class T>
-// T next(T it){
-//     T next = it;
-//     return ++next;
-// }
-
-// template<class T>
-// T prev(T it){
-//     T prev = it;
-//     return --prev;
-// }
 
 
 #endif
