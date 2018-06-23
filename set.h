@@ -186,6 +186,20 @@ struct set
         return appr_find(inf);
     }
 
+    // Возващает развернутый итератор на элемент с максимальным ключом.
+    const_iterator rbegin() const{
+        auto it = end();
+        --it;
+        it.reversed = true;
+        return it;    
+    }
+    // Возващает развернутый итератор на элемент следующий до элемента с минимальным ключом.
+    const_iterator rend() const{
+        auto it = end();
+        it.reversed = true;
+        return it;
+    }
+
     size_t size() const {
         return sz;
     }
@@ -213,20 +227,30 @@ struct set
         // Инкремент невалидного итератора неопределен.
         const_iterator& operator++(){
             assert(is_valid && cur->val != owner->inf);
-            if (cur->val == owner->inf)
-                return *this;
-            if (cur->right){
-                cur = cur->right;
-                while (cur->left){
-                    cur = cur->left;
+            if (!reversed){
+                if (cur->val == owner->inf)
+                    return *this;
+                if (cur->right){
+                    cur = cur->right;
+                    while (cur->left){
+                        cur = cur->left;
+                    }
+                    return *this;
                 }
+                while (cur->parent && cur == cur->parent->right){
+                    cur = cur->parent;
+                }
+                assert(cur->parent);
+                cur = cur->parent;
                 return *this;
             }
-            while (cur->parent && cur == cur->parent->right){
-                cur = cur->parent;
+            if (cur == owner->begin().cur){
+                cur = owner->end().cur;
+                return *this;
             }
-            assert(cur->parent);
-            cur = cur->parent;
+            reversed = false;
+            --*this;
+            reversed = true;
             return *this;
         }
 
@@ -241,18 +265,29 @@ struct set
         // Декремент невалидного итератора неопределен.
         const_iterator& operator--(){
             assert(is_valid);
-            if (cur->left){
-                cur = cur->left;
-                while (cur->right){
-                    cur = cur->right;
+            if (!reversed){
+                if (cur->left){
+                    cur = cur->left;
+                    while (cur->right){
+                        cur = cur->right;
+                    }
+                    return *this;
                 }
+                while (cur->parent && cur == cur->parent->left){
+                    cur = cur->parent;
+                }
+                assert(cur->parent);
+                cur = cur->parent;
                 return *this;
             }
-            while (cur->parent && cur == cur->parent->left){
-                cur = cur->parent;
+            if (cur->val == owner->inf){
+                cur = owner->begin().cur;
+                return *this;
             }
-            assert(cur->parent);
-            cur = cur->parent;
+            reversed = false;
+            ++*this;
+            assert(cur->val != owner->inf);
+            reversed = true;
             return *this;
         }
 
@@ -267,6 +302,7 @@ struct set
         const_iterator(const_iterator const& rhs){
             owner = rhs.owner;
             cur = rhs.cur;
+            reversed = rhs.reversed;
             is_valid = rhs.is_valid;
             owner->v.push_back(this);
         };
@@ -277,11 +313,11 @@ struct set
             my_set->v.push_back(this);
         }
 
-        ~const_iterator () {   
-            for (size_t it = 0; it < owner->v.size(); it++) {
-                if (owner->v[it] == this) {   
-                    owner->v.erase(owner->v.begin() + it);
-                    it--;
+        ~const_iterator () {
+            for (size_t i = 0; i < owner->v.size(); i++) {
+                if (owner->v[i] == this) {   
+                    owner->v.erase(owner->v.begin() + i);
+                    i--;
                 }
             }
         }
@@ -289,6 +325,7 @@ struct set
         const_iterator operator=(const_iterator const& rhs){
             owner = rhs.owner;
             cur = rhs.cur;
+            reversed = rhs.reversed;
             is_valid = rhs.is_valid;
             owner->v.push_back(this);
             return *this;
@@ -308,10 +345,11 @@ struct set
     private:
         node* cur = nullptr;
         bool is_valid = true;
+        bool reversed = false;
         set const* owner;
         
         bool equal(set<T>::const_iterator const right) const{
-            return cur == right.cur;
+            return cur == right.cur && reversed == right.reversed;
         }
     };
 

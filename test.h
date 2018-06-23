@@ -81,6 +81,15 @@ void test_int2(){
     }
     std::cout << (check ? "OK" : "Oh, no") << '\n';
     check = true;
+    auto rok_it = ok.rbegin();
+    my4_it = my4.rbegin();
+    while (my4_it != my4.rend()){
+        check &= (*my4_it == *rok_it);
+        my4_it++;
+        rok_it++;
+    }
+    std::cout << (check ? "OK" : "Oh, no") << '\n';
+    check = true;
 
     ok_it = ok.begin();
     my_it = my.begin();
@@ -146,9 +155,10 @@ void test_int(){
     while (it != c.end()){
         auto tmp = it;
         tmp++;
-        if (*it % 2) {
-            c.erase(it);
-        }
+        std::cout << *it << '\n';
+        //if (*it % 2) {
+         //   c.erase(it);
+        //}
         it = tmp;
     }
     for(auto it = c.begin(); it != c.end(); it++)
