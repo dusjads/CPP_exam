@@ -1,0 +1,1 @@
+/usr/bin/c++  -pthread -Wall -std=c++17 -pedantic    CMakeFiles/my_set.dir/my_set.cpp.o  -o my_set libcounted.a -lgtest 

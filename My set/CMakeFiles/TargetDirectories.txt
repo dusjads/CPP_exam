@@ -1,0 +1,5 @@
+/home/daria/Code/ITMO/C++/Smth/My set/CMakeFiles/rebuild_cache.dir
+/home/daria/Code/ITMO/C++/Smth/My set/CMakeFiles/edit_cache.dir
+/home/daria/Code/ITMO/C++/Smth/My set/CMakeFiles/counted.dir
+/home/daria/Code/ITMO/C++/Smth/My set/CMakeFiles/my_set.dir
+/home/daria/Code/ITMO/C++/Smth/My set/CMakeFiles/std.dir

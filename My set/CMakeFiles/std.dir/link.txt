@@ -1,0 +1,1 @@
+/usr/bin/c++  -pthread -Wall -std=c++17 -pedantic    CMakeFiles/std.dir/std.cpp.o  -o std libcounted.a 
